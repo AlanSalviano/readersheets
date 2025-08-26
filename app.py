@@ -164,7 +164,7 @@ def financial_analysis_page(data):
     # 💳 Resumo de Pagamento
     st.subheader("💳 Resumo por Métodos de Pagamento")
 
-    valid_payments = completed_services[completed_services['Pagamento'].isin(FORMS_PAGAMENTO_VALIDAS)]
+    valid_payments = completed_services[completed_services['Pagamento'].isin(FORMAS_PAGAMENTO_VALIDAS)]
 
     if not valid_payments.empty:
         payment_summary = valid_payments.groupby('Pagamento').agg({
@@ -272,7 +272,7 @@ def main():
             menu_icon="cast",
             default_index=0,
             styles={
-                "nav-link-selected": {"background-color": "#f400c7"},
+                "nav-link-selected": {"background-color": "#000000"},
             }
         )
 
