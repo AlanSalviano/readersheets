@@ -7,17 +7,30 @@ from modules.utils import format_currency
 # Nome do arquivo para salvar as configurações
 SETTINGS_FILE = "payroll_settings.json"
 
-def save_payroll_settings(settings):
-    """Salva as configurações do payroll em um arquivo JSON."""
+def save_payroll_settings(settings, custom_variables):
+    """Salva as configurações do payroll e as variáveis adicionais em um arquivo JSON."""
+    full_settings = {
+        "payroll_config": settings,
+        "custom_variables": custom_variables
+    }
     with open(SETTINGS_FILE, 'w') as f:
-        json.dump(settings, f)
+        json.dump(full_settings, f, indent=4)
 
 def load_payroll_settings():
-    """Carrega as configurações salvas do payroll."""
+    """Carrega as configurações salvas do payroll e as variáveis adicionais."""
     if os.path.exists(SETTINGS_FILE):
-        with open(SETTINGS_FILE, 'r') as f:
-            return json.load(f)
-    return {}
+        try:
+            with open(SETTINGS_FILE, 'r') as f:
+                data = json.load(f)
+                return data
+        except (json.JSONDecodeError, KeyError):
+            # Retorna a estrutura padrão caso o arquivo esteja vazio ou corrompido
+            return {"payroll_config": {}, "custom_variables": []}
+    return {"payroll_config": {}, "custom_variables": []}
+
+# Callback function to delete a variable row
+def delete_variable_row(index):
+    del st.session_state.custom_variables[index]
 
 def payroll_page(data):
     """
@@ -48,12 +61,12 @@ def payroll_page(data):
             }
             .data-row {
                 padding: 10px;
-                border-bottom: 1px solid #e0e0e0;
                 display: flex;
                 align-items: center;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
+                text-align: center;
             }
             .data-cell {
                 padding: 10px;
@@ -66,6 +79,18 @@ def payroll_page(data):
             }
         </style>
     """, unsafe_allow_html=True)
+
+    # Carrega as configurações salvas no início
+    saved_data = load_payroll_settings()
+    saved_settings = saved_data.get("payroll_config", {})
+    saved_custom_variables = saved_data.get("custom_variables", [])
+
+    # Inicializa o estado da sessão para as variáveis, carregando os dados salvos se existirem
+    if 'custom_variables' not in st.session_state:
+        if saved_custom_variables:
+            st.session_state.custom_variables = saved_custom_variables
+        else:
+            st.session_state.custom_variables = [{'description': '', 'valor_da_parcela': 0.0, 'total_de_parcelas': 0, 'parcela_atual': 0, 'tech': ''}]
 
     # Filtra apenas os serviços realizados
     completed_services = data[data['Realizado']]
@@ -85,9 +110,6 @@ def payroll_page(data):
     payroll_summary['Valor_Produzido'] = payroll_summary['Total_Servicos'] + payroll_summary['Total_Gorjetas']
     
     st.subheader("Resumo do Payroll por Técnico")
-    
-    # Carrega as configurações salvas
-    saved_settings = load_payroll_settings()
     
     # Cria uma lista para armazenar os dados de cada técnico
     payroll_data = []
@@ -110,6 +132,15 @@ def payroll_page(data):
     COMMISSION_OPTIONS = [20, 25]
     FIXED_PAYMENT_OPTIONS = ["Selecionar", 750.00, 900.00]
 
+    # Variaveis para totalização
+    total_pets_sum = 0
+    total_atendimentos_sum = 0
+    total_produzido_sum = 0
+    total_pagamento_base_sum = 0
+    total_variaveis_sum = 0
+    total_pagamento_final_sum = 0
+    total_support_value_sum = 0
+
     # Itera sobre cada técnico para criar os campos personalizados
     for index, row in payroll_summary.iterrows():
         tech_name = row['Nome']
@@ -125,16 +156,19 @@ def payroll_page(data):
 
         with cols[0]:
             display_name = tech_name[:15] + '...' if len(tech_name) > 15 else tech_name
-            st.markdown(f'<div class="data-row" style="font-size: 0.8rem;"><b>{display_name}</b></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="data-row" style="font-size: 0.88rem;"><b>{display_name}</b></div>', unsafe_allow_html=True)
         
         with cols[1]:
             st.markdown(f'<div class="data-row">{total_pets}</div>', unsafe_allow_html=True)
+            total_pets_sum += total_pets
             
         with cols[2]:
             st.markdown(f'<div class="data-row">{total_atendimentos}</div>', unsafe_allow_html=True)
+            total_atendimentos_sum += total_atendimentos
             
         with cols[3]:
             st.markdown(f'<div class="data-row">{format_currency(valor_produzido)}</div>', unsafe_allow_html=True)
+            total_produzido_sum += valor_produzido
         
         with cols[4]:
             # Lógica para definir o padrão da comissão
@@ -163,9 +197,11 @@ def payroll_page(data):
 
         # Cálculo do pagamento base
         pagamento_base = total_servicos * (comissao_porcentagem / 100) + total_gorjetas
-
+        
         with cols[5]:
-            st.markdown(f'<div class="data-row">{format_currency(pagamento_base)}</div>', unsafe_allow_html=True)
+            base_style = "color: red !important;" if 'min_value' in st.session_state and pagamento_base < st.session_state.min_value else ""
+            st.markdown(f'<div class="data-row" style="{base_style}">{format_currency(pagamento_base)}</div>', unsafe_allow_html=True)
+            total_pagamento_base_sum += pagamento_base
             
         with cols[6]:
             # Lógica para definir o padrão do pagamento fixo
@@ -195,22 +231,23 @@ def payroll_page(data):
             
             # Lógica para usar o pagamento fixo ou o pagamento base
             pagamento_para_calculo = pagamento_fixo if pagamento_fixo != "Selecionar" else pagamento_base
-
+        
+        # Encontra as variáveis personalizadas para o técnico atual
+        custom_vars_value = sum(
+            v['valor_da_parcela'] for v in st.session_state.custom_variables if v['tech'] == tech_name
+        )
+        
         with cols[7]:
-            # Campo para o usuário adicionar variáveis (opcional)
-            variaveis = st.number_input(
-                "Valor",
-                value=0.0,
-                format="%.2f",
-                key=f"variaveis_{tech_name}",
-                label_visibility="collapsed"
-            )
+            vars_style = "color: green !important;" if custom_vars_value > 0 else "color: red !important;" if custom_vars_value < 0 else ""
+            st.markdown(f'<div class="data-row" style="{vars_style}">{format_currency(custom_vars_value)}</div>', unsafe_allow_html=True)
+            total_variaveis_sum += custom_vars_value
 
         # Cálculo do pagamento final
-        pagamento_final = pagamento_para_calculo + variaveis
+        pagamento_final = pagamento_para_calculo + custom_vars_value
 
         with cols[8]:
-            st.markdown(f'<div class="data-row"><b>{format_currency(pagamento_final)}</b></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="data-row"><b>{format_currency(pagamento_final)}</b></b></div>', unsafe_allow_html=True)
+            total_pagamento_final_sum += pagamento_final
         
         with cols[9]:
             # Lógica para o campo 'Support Value'
@@ -219,6 +256,7 @@ def payroll_page(data):
                 support_value = pagamento_final - pagamento_base
             
             st.markdown(f'<div class="data-row">{format_currency(support_value)}</div>', unsafe_allow_html=True)
+            total_support_value_sum += support_value
 
         # Adiciona os dados para exportação e para salvar configurações
         payroll_data.append({
@@ -229,7 +267,7 @@ def payroll_page(data):
             "Comissao (%)": comissao_porcentagem,
             "Pagamento Base": pagamento_base,
             "Pagamento Fixo": pagamento_fixo if pagamento_fixo != "Selecionar" else pagamento_base,
-            "Variáveis": variaveis,
+            "Variáveis": custom_vars_value,
             "Pagamento Final": pagamento_final,
             "Support Value": (pagamento_final - pagamento_base) if pagamento_final > pagamento_base else 0
         })
@@ -240,10 +278,147 @@ def payroll_page(data):
             'pagamento_fixo': pagamento_fixo if pagamento_fixo != "Selecionar" else None
         }
 
+    # Linha de totalização
+    st.markdown("---")
+    cols_total = st.columns(10)
+    with cols_total[0]:
+        st.markdown(f'<div class="data-row"><b>Total</b></div>', unsafe_allow_html=True)
+    with cols_total[1]:
+        st.markdown(f'<div class="data-row"><b>{total_pets_sum}</b></div>', unsafe_allow_html=True)
+    with cols_total[2]:
+        st.markdown(f'<div class="data-row"><b>{total_atendimentos_sum}</b></div>', unsafe_allow_html=True)
+    with cols_total[3]:
+        st.markdown(f'<div class="data-row"><b>{format_currency(total_produzido_sum)}</b></div>', unsafe_allow_html=True)
+    with cols_total[4]:
+        st.markdown(f'<div class="data-row"></div>', unsafe_allow_html=True)
+    with cols_total[5]:
+        st.markdown(f'<div class="data-row"><b>{format_currency(total_pagamento_base_sum)}</b></div>', unsafe_allow_html=True)
+    with cols_total[6]:
+        st.markdown(f'<div class="data-row"></div>', unsafe_allow_html=True)
+    with cols_total[7]:
+        vars_style = "color: green !important;" if total_variaveis_sum > 0 else "color: red !important;" if total_variaveis_sum < 0 else ""
+        st.markdown(f'<div class="data-row" style="{vars_style}"><b>{format_currency(total_variaveis_sum)}</b></div>', unsafe_allow_html=True)
+    with cols_total[8]:
+        st.markdown(f'<div class="data-row"><b>{format_currency(total_pagamento_final_sum)}</b></div>', unsafe_allow_html=True)
+    with cols_total[9]:
+        st.markdown(f'<div class="data-row"><b>{format_currency(total_support_value_sum)}</b></div>', unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    st.subheader("Variáveis Adicionais")
+    st.markdown("""
+        <style>
+            .variable-row-container {
+                padding: 10px;
+                border-bottom: 1px solid #e0e0e0;
+                display: flex;
+                gap: 0px;
+                align-items: center;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    # Cria o cabeçalho das variáveis
+    var_headers = st.columns([0.2, 0.2, 0.1, 0.1, 0.1, 0.1, 0.1, 0.05])
+    with var_headers[0]:
+        st.markdown(f'<div class="header-cell">Técnico</div>', unsafe_allow_html=True)
+    with var_headers[1]:
+        st.markdown(f'<div class="header-cell">Descrição da Variável</div>', unsafe_allow_html=True)
+    with var_headers[2]:
+        st.markdown(f'<div class="header-cell">Valor da Parcela</div>', unsafe_allow_html=True)
+    with var_headers[3]:
+        st.markdown(f'<div class="header-cell">Total de Parcelas</div>', unsafe_allow_html=True)
+    with var_headers[4]:
+        st.markdown(f'<div class="header-cell">Parcela Atual</div>', unsafe_allow_html=True)
+    with var_headers[5]:
+        st.markdown(f'<div class="header-cell">Dívida Total</div>', unsafe_allow_html=True)
+    with var_headers[6]:
+        st.markdown(f'<div class="header-cell">Dívida Paga</div>', unsafe_allow_html=True)
+    with var_headers[7]:
+        st.markdown(f'<div class="header-cell"></div>', unsafe_allow_html=True) # Coluna vazia para o botão
+
+    # Itera sobre o estado da sessão para criar as linhas de variáveis
+    for i in range(len(st.session_state.custom_variables)):
+        cols = st.columns([0.2, 0.2, 0.1, 0.1, 0.1, 0.1, 0.1, 0.05])
+        
+        with cols[0]:
+            tech_options = [''] + list(payroll_summary['Nome'].unique())
+            default_index = tech_options.index(st.session_state.custom_variables[i]['tech']) if st.session_state.custom_variables[i]['tech'] in tech_options else 0
+            
+            st.session_state.custom_variables[i]['tech'] = st.selectbox(
+                "Técnico",
+                options=tech_options,
+                key=f"var_tech_{i}",
+                label_visibility="collapsed",
+                index=default_index
+            )
+        with cols[1]:
+            st.session_state.custom_variables[i]['description'] = st.text_input(
+                "Descrição",
+                value=st.session_state.custom_variables[i]['description'],
+                key=f"var_desc_{i}",
+                label_visibility="collapsed"
+            )
+        with cols[2]:
+            st.session_state.custom_variables[i]['valor_da_parcela'] = st.number_input(
+                "Valor da Parcela",
+                value=st.session_state.custom_variables[i]['valor_da_parcela'] if st.session_state.custom_variables[i]['valor_da_parcela'] >= 0 else 0.0,
+                min_value=0.0,
+                format="%.2f",
+                key=f"var_valor_parcela_{i}",
+                label_visibility="collapsed"
+            )
+        with cols[3]:
+            st.session_state.custom_variables[i]['total_de_parcelas'] = st.number_input(
+                "Total de Parcelas",
+                value=st.session_state.custom_variables[i]['total_de_parcelas'] if st.session_state.custom_variables[i]['total_de_parcelas'] >= 0 else 0,
+                min_value=0,
+                format="%d",
+                key=f"var_total_parcelas_{i}",
+                label_visibility="collapsed"
+            )
+        with cols[4]:
+            st.session_state.custom_variables[i]['parcela_atual'] = st.number_input(
+                "Parcela Atual",
+                value=st.session_state.custom_variables[i]['parcela_atual'] if st.session_state.custom_variables[i]['parcela_atual'] >= 0 else 0,
+                min_value=0,
+                format="%d",
+                key=f"var_parcela_atual_{i}",
+                label_visibility="collapsed"
+            )
+        with cols[5]:
+            total_debt = st.session_state.custom_variables[i]['valor_da_parcela'] * st.session_state.custom_variables[i]['total_de_parcelas']
+            st.markdown(f'<div class="data-row">{format_currency(total_debt)}</div>', unsafe_allow_html=True)
+        with cols[6]:
+            paid_debt = st.session_state.custom_variables[i]['valor_da_parcela'] * st.session_state.custom_variables[i]['parcela_atual']
+            st.markdown(f'<div class="data-row">{format_currency(paid_debt)}</div>', unsafe_allow_html=True)
+        
+        with cols[7]:
+            st.button("🗑️", key=f"delete_{i}", on_click=delete_variable_row, args=(i,))
+
+    if st.button("Adicionar nova variável"):
+        st.session_state.custom_variables.append({'description': '', 'valor_da_parcela': 0.0, 'total_de_parcelas': 0, 'parcela_atual': 0, 'tech': ''})
+
+    # Painel de configurações
+    st.markdown("---")
+    # Inicializa o valor mínimo se não existir
+    if 'min_value' not in st.session_state:
+        st.session_state.min_value = 0.0
+        
+    st.session_state.min_value = st.number_input(
+        "Valor Mínimo para Pagamento Base",
+        value=st.session_state.min_value,
+        format="%.2f",
+        key="min_value_input"
+    )
+
     # Botão para salvar as configurações
     st.markdown("---")
     if st.button("Salvar Configurações"):
-        save_payroll_settings(current_settings)
+        save_payroll_settings(current_settings, st.session_state.custom_variables)
         st.success("Configurações salvas com sucesso!")
 
     # Criação do DataFrame final e botão de download
