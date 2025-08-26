@@ -36,17 +36,24 @@ def payroll_page(data):
                 margin-bottom: 0.5rem;
             }
             .header-cell {
-                background-color: #f400c7;
-                color: white;
+                background-color: white;
+                color: black;
                 font-weight: bold;
                 padding: 10px;
                 text-align: center;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                font-size: 0.8rem;
             }
             .data-row {
                 padding: 10px;
                 border-bottom: 1px solid #e0e0e0;
                 display: flex;
                 align-items: center;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
             .data-cell {
                 padding: 10px;
@@ -55,6 +62,7 @@ def payroll_page(data):
             }
             .st-emotion-cache-13k623y > div {
                 padding: 0;
+                gap: 0;
             }
         </style>
     """, unsafe_allow_html=True)
@@ -116,7 +124,8 @@ def payroll_page(data):
         cols = st.columns(10)
 
         with cols[0]:
-            st.markdown(f'<div class="data-row"><b>{tech_name}</b></div>', unsafe_allow_html=True)
+            display_name = tech_name[:15] + '...' if len(tech_name) > 15 else tech_name
+            st.markdown(f'<div class="data-row" style="font-size: 0.8rem;"><b>{display_name}</b></div>', unsafe_allow_html=True)
         
         with cols[1]:
             st.markdown(f'<div class="data-row">{total_pets}</div>', unsafe_allow_html=True)
