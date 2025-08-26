@@ -1,0 +1,66 @@
+/* Fundo da aplicação */
+.stApp {
+    background-color: white;
+}
+
+/* Sidebar */
+.css-1d391kg {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Header principal */
+h1, h2, h3 {
+    color: #003366;
+    font-weight: 700;
+}
+
+/* Texto normal */
+body, p, div {
+    font-family: 'Segoe UI', sans-serif;
+    color: #333333;
+}
+
+/* Botões */
+.stButton > button {
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.stButton > button:hover {
+    background-color: #004999;
+}
+
+/* Cards das métricas */
+.css-1ht1j8u {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Tabelas */
+thead tr th {
+    background-color: #0066cc;
+    color: white;
+    font-weight: bold;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f0f0f0;
+}
+
+/* Links do rodapé */
+footer {
+    text-align: center;
+    color: #888;
+    font-size: 12px;
+    margin-top: 20px;
+}
