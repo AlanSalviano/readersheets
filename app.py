@@ -48,6 +48,12 @@ def financial_analysis_page(data):
     # Processamento dos dados
     completed_services = data[data['Realizado']]
     not_completed = data[(data['Realizado'] == False) & (data['Cliente'].notna())]
+    
+    # Adicionar o cálculo da quantidade de Pets a partir da coluna 'Pets'
+    if 'Pets' in completed_services.columns:
+        quantidade_pets = completed_services['Pets'].sum()
+    else:
+        quantidade_pets = 0
 
     dias_trabalhados = completed_services.groupby(['Nome', 'Semana', 'Data']).size().reset_index()
     dias_trabalhados = dias_trabalhados.groupby(['Nome', 'Semana']).size().reset_index(name='Dias Trabalhados')
@@ -71,12 +77,13 @@ def financial_analysis_page(data):
     # 📊 Métricas Gerais
     total_lucro = completed_services['Lucro Empresa'].sum()
 
-    col1, col2, col3, col4, col5 = st.columns(5)
+    col1, col2, col3, col4, col5, col6 = st.columns(6)
     col1.metric("Realizados", len(completed_services))
-    col2.metric("Não Realizados", len(not_completed))
-    col3.metric("Total em Serviços", format_currency(completed_services['Serviço'].sum()))
-    col4.metric("Total em Gorjetas", format_currency(completed_services['Gorjeta'].sum()))
-    col5.metric("Lucro da Empresa", format_currency(total_lucro))
+    col2.metric("Quantidade total de Pets", quantidade_pets)
+    col3.metric("Não Realizados", len(not_completed))
+    col4.metric("Total em Serviços", format_currency(completed_services['Serviço'].sum()))
+    col5.metric("Total em Gorjetas", format_currency(completed_services['Gorjeta'].sum()))
+    col6.metric("Lucro da Empresa", format_currency(total_lucro))
 
     # 📅 Gráficos
     st.subheader("Evolução Semanal dos Serviços")
