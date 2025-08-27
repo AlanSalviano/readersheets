@@ -201,7 +201,8 @@ def payroll_page(data):
         pagamento_base = total_servicos * (comissao_porcentagem / 100) + total_gorjetas
         
         with cols[5]:
-            base_style = "color: red !important;" if 'min_value' in st.session_state and pagamento_base < st.session_state.min_value else ""
+            # Regra para deixar a linha vermelha se o pagamento base for menor que 900
+            base_style = "color: red !important;" if pagamento_base < 900 else ""
             st.markdown(f'<div class="data-row" style="{base_style}">{format_currency(pagamento_base)}</div>', unsafe_allow_html=True)
             total_pagamento_base_sum += pagamento_base
             
@@ -248,7 +249,9 @@ def payroll_page(data):
         pagamento_final = pagamento_para_calculo + custom_vars_value
 
         with cols[8]:
-            st.markdown(f'<div class="data-row"><b>{format_currency(pagamento_final)}</b></b></div>', unsafe_allow_html=True)
+            # Aplica a cor vermelha se o pagamento final for menor que 900
+            final_style = "color: red !important;" if pagamento_final < 900 else ""
+            st.markdown(f'<div class="data-row" style="{final_style}"><b>{format_currency(pagamento_final)}</b></div>', unsafe_allow_html=True)
             total_pagamento_final_sum += pagamento_final
         
         with cols[9]:
@@ -406,17 +409,7 @@ def payroll_page(data):
 
     # Painel de configurações
     st.markdown("---")
-    # Inicializa o valor mínimo se não existir
-    if 'min_value' not in st.session_state:
-        st.session_state.min_value = 0.0
-        
-    st.session_state.min_value = st.number_input(
-        "Valor Mínimo para Pagamento Base",
-        value=st.session_state.min_value,
-        format="%.2f",
-        key="min_value_input"
-    )
-
+    
     # Botão para salvar as configurações
     col_buttons = st.columns([0.2, 0.8])
     with col_buttons[0]:
