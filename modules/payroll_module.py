@@ -3,6 +3,7 @@ import pandas as pd
 import json
 import os
 from modules.utils import format_currency
+from modules.pdf_generator import create_payroll_summary_with_vars_pdf
 
 # Nome do arquivo para salvar as configurações
 SETTINGS_FILE = "payroll_settings.json"
@@ -416,10 +417,22 @@ def payroll_page(data):
     )
 
     # Botão para salvar as configurações
-    st.markdown("---")
-    if st.button("Salvar Configurações"):
-        save_payroll_settings(current_settings, st.session_state.custom_variables)
-        st.success("Configurações salvas com sucesso!")
+    col_buttons = st.columns([0.2, 0.8])
+    with col_buttons[0]:
+        if st.button("Salvar Configurações"):
+            save_payroll_settings(current_settings, st.session_state.custom_variables)
+            st.success("Configurações salvas com sucesso!")
+
+    with col_buttons[1]:
+        # Botão para gerar o PDF
+        if st.button("Baixar PDF do Payroll"):
+            pdf_data = create_payroll_summary_with_vars_pdf(payroll_data, st.session_state.custom_variables)
+            st.download_button(
+                label="📥 Baixar PDF do Payroll",
+                data=pdf_data.output(dest='S').encode('latin-1'),
+                file_name="payroll_report.pdf",
+                mime="application/pdf"
+            )
 
     # Criação do DataFrame final e botão de download
     st.markdown("---")
