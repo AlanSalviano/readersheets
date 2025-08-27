@@ -3,7 +3,8 @@ import pandas as pd
 import json
 import os
 from modules.utils import format_currency
-from modules.pdf_generator import create_payroll_summary_with_vars_pdf
+from modules.payroll_pdf_generator import create_payroll_summary_with_vars_pdf
+from modules.pdf_generator import create_pdf, create_tech_payment_receipt, create_technician_of_the_week_receipt
 
 # Nome do arquivo para salvar as configurações
 SETTINGS_FILE = "payroll_settings.json"
@@ -423,18 +424,24 @@ def payroll_page(data):
             save_payroll_settings(current_settings, st.session_state.custom_variables)
             st.success("Configurações salvas com sucesso!")
 
-    with col_buttons[1]:
-        # Botão para gerar o PDF
-        if st.button("Baixar PDF do Payroll"):
-            pdf_data = create_payroll_summary_with_vars_pdf(payroll_data, st.session_state.custom_variables)
-            st.download_button(
-                label="📥 Baixar PDF do Payroll",
-                data=pdf_data.output(dest='S').encode('latin-1'),
-                file_name="payroll_report.pdf",
-                mime="application/pdf"
-            )
+    # Adicionei um novo `st.columns` para os campos de data e o botão de download do PDF
+    col_pdf_buttons = st.columns([0.2, 0.2, 0.6])
+    with col_pdf_buttons[0]:
+        start_date = st.date_input("Data inicial", value=None)
+    with col_pdf_buttons[1]:
+        end_date = st.date_input("Data final", value=None)
+    with col_pdf_buttons[2]:
+        st.markdown("<br>", unsafe_allow_html=True) # Espaçamento para alinhar o botão com os campos de data
+        # Lógica para gerar o PDF
+        pdf_data = create_payroll_summary_with_vars_pdf(payroll_data, st.session_state.custom_variables, start_date, end_date)
+        st.download_button(
+            label="📥 Baixar PDF do Payroll",
+            data=pdf_data.output(dest='S').encode('latin-1'),
+            file_name="payroll_report.pdf",
+            mime="application/pdf"
+        )
 
-    # Criação do DataFrame final e botão de download
+
     st.markdown("---")
     st.subheader("Tabela de Payroll para Download")
     final_payroll_df = pd.DataFrame(payroll_data)
