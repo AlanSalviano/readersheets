@@ -42,14 +42,24 @@ def extract_folder_id(url_or_id):
 
 def financial_analysis_page(data):
     """Conteúdo da página de Análises Financeiras."""
+
+    # Título principal do dashboard
+    st.markdown(
+        """
+        <div style="padding-top: 10px; padding-bottom: 10px;">
+            <h1 style="font-weight: 700;">Dashboard de Análises Financeiras</h1>
+            <p style="color: #666; font-size: 1.1rem;">Visão geral da performance e métricas operacionais.</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
     
-    st.title("BNS - PORTAL DE ANÁLISES DE DADOS FINANCEIROS")
-    
+    st.markdown("---")
+
     # Processamento dos dados
     completed_services = data[data['Realizado']]
     not_completed = data[(data['Realizado'] == False) & (data['Cliente'].notna())]
     
-    # Adicionar o cálculo da quantidade de Pets a partir da coluna 'Pets'
     if 'Pets' in completed_services.columns:
         quantidade_pets = completed_services['Pets'].sum()
     else:
@@ -74,103 +84,70 @@ def financial_analysis_page(data):
         lambda x: calcular_pagamento_individual(x, weekly_totals), axis=1, result_type='expand'
     )
 
-    # 📊 Métricas Gerais
+    # 📊 Cartões de Métricas - Layout mais compacto
     total_lucro = completed_services['Lucro Empresa'].sum()
+    
+    with st.container():
+        st.markdown('<h3 style="margin-bottom: 0;">Métricas Gerais</h3>', unsafe_allow_html=True)
+        col1, col2, col3, col4, col5, col6 = st.columns(6)
+        
+        with col1:
+            st.markdown('<div class="metric-card-compact"><p class="metric-title-compact">Realizados</p><p class="metric-value-compact">{0}</p></div>'.format(len(completed_services)), unsafe_allow_html=True)
+        with col2:
+            st.markdown('<div class="metric-card-compact"><p class="metric-title-compact">Total Pets</p><p class="metric-value-compact">{0}</p></div>'.format(quantidade_pets), unsafe_allow_html=True)
+        with col3:
+            st.markdown('<div class="metric-card-compact"><p class="metric-title-compact">Não Realizados</p><p class="metric-value-compact">{0}</p></div>'.format(len(not_completed)), unsafe_allow_html=True)
+        with col4:
+            st.markdown('<div class="metric-card-compact"><p class="metric-title-compact">Total Serviços</p><p class="metric-value-compact">{0}</p></div>'.format(format_currency(completed_services["Serviço"].sum())), unsafe_allow_html=True)
+        with col5:
+            st.markdown('<div class="metric-card-compact"><p class="metric-title-compact">Total Gorjetas</p><p class="metric-value-compact">{0}</p></div>'.format(format_currency(completed_services["Gorjeta"].sum())), unsafe_allow_html=True)
+        with col6:
+            st.markdown('<div class="metric-card-compact"><p class="metric-title-compact">Lucro Empresa</p><p class="metric-value-compact">{0}</p></div>'.format(format_currency(total_lucro)), unsafe_allow_html=True)
+    
+    st.markdown("---")
 
-    col1, col2, col3, col4, col5, col6 = st.columns(6)
-    col1.metric("Realizados", len(completed_services))
-    col2.metric("Quantidade total de Pets", quantidade_pets)
-    col3.metric("Não Realizados", len(not_completed))
-    col4.metric("Total em Serviços", format_currency(completed_services['Serviço'].sum()))
-    col5.metric("Total em Gorjetas", format_currency(completed_services['Gorjeta'].sum()))
-    col6.metric("Lucro da Empresa", format_currency(total_lucro))
+    # 📈 Gráficos e Tabelas - Layout de duas colunas
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("### Evolução e Pagamentos")
+        st.plotly_chart(plot_weekly_evolution(weekly_totals), use_container_width=True)
+        
+        st.plotly_chart(plot_weekly_payments(weekly_totals), use_container_width=True)
 
-    # 📅 Gráficos
-    st.subheader("Evolução Semanal dos Serviços")
-    st.plotly_chart(plot_weekly_evolution(weekly_totals), use_container_width=True)
+    with col2:
+        st.markdown("### Resumo por Técnico")
+        tech_summary = weekly_totals.groupby(['Nome', 'Categoria']).agg({
+            'Serviço': 'sum',
+            'Gorjeta': 'sum',
+            'Pagamento Tecnico': 'sum',
+            'Lucro Empresa': 'sum',
+            'Dia': 'sum',
+            'Dias Trabalhados': 'sum'
+        }).reset_index()
 
-    st.subheader("Pagamento Semanal por Técnico")
-    st.plotly_chart(plot_weekly_payments(weekly_totals), use_container_width=True)
+        tech_summary.columns = ['Técnico', 'Categoria', 'Total Serviços',
+                                'Total Gorjetas', 'Total Pagamento', 'Lucro Empresa',
+                                'Atendimentos', 'Dias Trabalhados']
 
-    # 👩‍🔧 Resumo por Técnico
-    st.subheader("Resumo por Técnico")
+        tech_summary['Média Atendimento'] = tech_summary['Total Serviços'] / tech_summary['Atendimentos']
+        tech_summary['Gorjeta Média'] = tech_summary['Total Gorjetas'] / tech_summary['Atendimentos']
 
-    tech_summary = weekly_totals.groupby(['Nome', 'Categoria']).agg({
-        'Serviço': 'sum',
-        'Gorjeta': 'sum',
-        'Pagamento Tecnico': 'sum',
-        'Lucro Empresa': 'sum',
-        'Dia': 'sum',
-        'Dias Trabalhados': 'sum'
-    }).reset_index()
+        for col in ['Total Serviços', 'Total Gorjetas', 'Total Pagamento', 'Lucro Empresa',
+                    'Média Atendimento', 'Gorjeta Média']:
+            tech_summary[col] = tech_summary[col].apply(format_currency)
 
-    tech_summary.columns = ['Técnico', 'Categoria', 'Total Serviços',
-                            'Total Gorjetas', 'Total Pagamento', 'Lucro Empresa',
-                            'Atendimentos', 'Dias Trabalhados']
+        st.dataframe(tech_summary.sort_values('Atendimentos', ascending=False), hide_index=True)
 
-    tech_summary['Média Atendimento'] = tech_summary['Total Serviços'] / tech_summary['Atendimentos']
-    tech_summary['Gorjeta Média'] = tech_summary['Total Gorjetas'] / tech_summary['Atendimentos']
-
-    for col in ['Total Serviços', 'Total Gorjetas', 'Total Pagamento', 'Lucro Empresa',
-                'Média Atendimento', 'Gorjeta Média']:
-        tech_summary[col] = tech_summary[col].apply(format_currency)
-
-    st.dataframe(tech_summary.sort_values('Atendimentos', ascending=False))
-
-    # 🏆 Cards de produtividade
-    if len(st.session_state.selected_weeks) == 1:
-        week = st.session_state.selected_weeks[0]
-        week_data = completed_services[completed_services['Semana'] == week]
-
-        if not week_data.empty:
-            summary = week_data.groupby('Nome').agg({
-                'Cliente': 'count'
-            }).reset_index().rename(columns={'Cliente': 'Atendimentos'})
-
-            media_geral = summary['Atendimentos'].mean()
-
-            top_tech = summary.sort_values('Atendimentos', ascending=False).iloc[0]
-            low_tech = summary.sort_values('Atendimentos', ascending=True).iloc[0]
-
-            col1, col2 = st.columns(2)
-
-            with col1:
-                st.markdown("---")
-                st.subheader("🏆 Technician of the Week")
-                st.success(f"**{top_tech['Nome']}** foi o técnico com as melhores métricas da semana **{week}**!")
-                st.markdown(f"""
-                    - 👥 **Atendimentos:** {top_tech['Atendimentos']}  
-                    - 📊 **Média dos técnicos:** {media_geral:.2f} atendimentos  
-                    - 🚀 **Produtividade:** {((top_tech['Atendimentos'] / media_geral) - 1) * 100:+.1f}%
-                """)
-                st.markdown("---")
-
-            with col2:
-                st.markdown("---")
-                st.subheader("📉 Menor Produtividade da Semana")
-                st.error(f"**{low_tech['Nome']}** teve a menor quantidade de atendimentos na semana **{week}**.")
-                st.markdown(f"""
-                    - 👥 **Atendimentos:** {low_tech['Atendimentos']}  
-                    - 📊 **Média dos técnicos:** {media_geral:.2f} atendimentos  
-                    - 💤 **Produtividade:** {((low_tech['Atendimentos'] / media_geral) - 1) * 100:+.1f}%
-                """)
-                st.markdown("---")
+        st.markdown("### Atendimentos Não Realizados")
+        if not not_completed.empty:
+            st.warning(f"{len(not_completed)} atendimentos não realizados.")
+            st.dataframe(not_completed[['Nome', 'Dia', 'Data', 'Cliente']], hide_index=True)
         else:
-            st.info("Nenhum dado encontrado para essa semana.")
-    else:
-        st.info("Selecione exatamente **uma semana** para visualizar os cards de produtividade dos técnicos.")
-
-    # ⚠️ Atendimentos não realizados
-    st.subheader("⚠️ Atendimentos Não Realizados")
-    if not not_completed.empty:
-        st.warning(f"{len(not_completed)} atendimentos não realizados.")
-        st.dataframe(not_completed[['Nome', 'Dia', 'Data', 'Cliente']])
-    else:
-        st.success("Todos os agendamentos foram realizados!")
+            st.success("Todos os agendamentos foram realizados!")
 
     # 💳 Resumo de Pagamento
-    st.subheader("💳 Resumo por Métodos de Pagamento")
-
+    st.markdown("---")
+    st.markdown("### Resumo de Pagamento")
     valid_payments = completed_services[completed_services['Pagamento'].isin(FORMAS_PAGAMENTO_VALIDAS)]
 
     if not valid_payments.empty:
@@ -183,14 +160,18 @@ def financial_analysis_page(data):
         payment_summary['Total'] = payment_summary['Serviço'] + payment_summary['Gorjeta']
         payment_summary['Percentual Uso'] = (payment_summary['Qtd Usos'] / payment_summary['Qtd Usos'].sum() * 100).round(2)
 
-        st.dataframe(payment_summary)
+        st.dataframe(payment_summary, hide_index=True)
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.plotly_chart(plot_payment_methods_total(payment_summary), use_container_width=True)
+        with col2:
+            st.plotly_chart(plot_payment_methods_usage(payment_summary), use_container_width=True)
 
-        st.plotly_chart(plot_payment_methods_total(payment_summary), use_container_width=True)
-        st.plotly_chart(plot_payment_methods_usage(payment_summary), use_container_width=True)
+    st.markdown("---")
 
     # 📤 Exportar Dados
-    st.subheader("📤 Exportar Dados")
-
+    st.markdown("### Exportar Dados")
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
