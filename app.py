@@ -9,7 +9,8 @@ from modules.config import FORMAS_PAGAMENTO_VALIDAS, INVALID_CLIENTS
 from modules.pdf_generator import (
     create_pdf,
     create_tech_payment_receipt,
-    create_technician_of_the_week_receipt
+    create_technician_of_the_week_receipt,
+    create_payroll_summary_with_vars_pdf
 )
 from modules.visualization import (
     plot_weekly_evolution,
