@@ -26,33 +26,52 @@ def create_payroll_summary_with_vars_pdf(payroll_data, custom_variables, start_d
     for i in range(0, len(payroll_data), 3):
         tech_group = payroll_data[i:i+3]
         
+        line_height = 6
+        num_lines_tech = 10  # Aumenta o número de linhas para incluir o Support Value
+        block_height_tech = num_lines_tech * line_height + 2
+        
+        # Verifica se há espaço para o próximo grupo de técnicos
+        if pdf.get_y() + block_height_tech > pdf.h - pdf.b_margin:
+            pdf.add_page()
+            pdf.ln(5)
+
         y_start = pdf.get_y()
-        
-        if len(tech_group) > 0:
-            tech_data = tech_group[0]
-            x_pos = 10
+
+        for j, tech_data in enumerate(tech_group):
+            x_pos = 10 + j * col_width
+            
+            # Define a cor do bloco para os técnicos
+            pdf.set_fill_color(240, 240, 240)
+            pdf.set_text_color(0, 0, 0)
+            
+            # Desenha o retângulo de fundo e a borda
+            pdf.rect(x_pos - 1, y_start - 1, col_width, block_height_tech, 'F')
+            pdf.rect(x_pos - 1, y_start - 1, col_width, block_height_tech, 'D')
+            
             pdf.set_xy(x_pos, y_start)
             pdf.set_font("Arial", 'B', 10)
-            pdf.cell(col_width, 7, txt=f"Técnico: {tech_data['Técnico']}", ln=1)
+            pdf.cell(col_width, line_height, txt=f"Técnico: {tech_data['Técnico']}", ln=1)
             pdf.set_font("Arial", size=10)
             pdf.set_x(x_pos)
-            pdf.cell(col_width, 6, txt=f"Pets: {tech_data['Total de Pets']}", ln=1)
+            pdf.cell(col_width, line_height, txt=f"Pets: {tech_data['Total de Pets']}", ln=1)
             pdf.set_x(x_pos)
-            pdf.cell(col_width, 6, txt=f"Atendimentos: {tech_data['Total de Atendimentos']}", ln=1)
+            pdf.cell(col_width, line_height, txt=f"Atendimentos: {tech_data['Total de Atendimentos']}", ln=1)
             pdf.set_x(x_pos)
-            pdf.cell(col_width, 6, txt=f"Valor Produzido: {format_currency(tech_data['Valor Produzido'])}", ln=1)
+            pdf.cell(col_width, line_height, txt=f"Valor Produzido: {format_currency(tech_data['Valor Produzido'])}", ln=1)
             pdf.set_x(x_pos)
-            pdf.cell(col_width, 6, txt=f"Comissão (%): {tech_data['Comissao (%)']}%", ln=1)
+            pdf.cell(col_width, line_height, txt=f"Comissão (%): {tech_data['Comissao (%)']}%", ln=1)
             pdf.set_x(x_pos)
 
             if tech_data['Pagamento Base'] < 900:
                 pdf.set_font("Arial", 'U', 10)
+                pdf.set_text_color(255, 0, 0)
             
-            pdf.cell(col_width, 6, txt=f"Pagamento Base: {format_currency(tech_data['Pagamento Base'])}", ln=1)
+            pdf.cell(col_width, line_height, txt=f"Pagamento Base: {format_currency(tech_data['Pagamento Base'])}", ln=1)
             pdf.set_font("Arial", '', 10)
+            pdf.set_text_color(0, 0, 0)
             
             pdf.set_x(x_pos)
-            pdf.cell(col_width, 6, txt=f"Pagamento Fixo: {format_currency(tech_data['Pagamento Fixo'])}", ln=1)
+            pdf.cell(col_width, line_height, txt=f"Pagamento Fixo: {format_currency(tech_data['Pagamento Fixo'])}", ln=1)
             pdf.set_x(x_pos)
             
             if tech_data['Variáveis'] > 0:
@@ -60,95 +79,16 @@ def create_payroll_summary_with_vars_pdf(payroll_data, custom_variables, start_d
             elif tech_data['Variáveis'] < 0:
                 pdf.set_text_color(255, 0, 0)
             
-            pdf.cell(col_width, 6, txt=f"Variáveis: {format_currency(tech_data['Variáveis'])}", ln=1)
+            pdf.cell(col_width, line_height, txt=f"Variáveis: {format_currency(tech_data['Variáveis'])}", ln=1)
             pdf.set_text_color(0, 0, 0)
             
             pdf.set_x(x_pos)
-            pdf.cell(col_width, 6, txt=f"Pagamento Final: {format_currency(tech_data['Pagamento Final'])}", ln=1)
+            pdf.cell(col_width, line_height, txt=f"Pagamento Final: {format_currency(tech_data['Pagamento Final'])}", ln=1)
             pdf.set_x(x_pos)
-            pdf.cell(col_width, 6, txt=f"Support Value: {format_currency(tech_data['Support Value'])}", ln=1)
+            pdf.cell(col_width, line_height, txt=f"Support Value: {format_currency(tech_data['Support Value'])}", ln=1)
 
-        if len(tech_group) > 1:
-            tech_data = tech_group[1]
-            x_pos = 10 + col_width
-            pdf.set_xy(x_pos, y_start)
-            pdf.set_font("Arial", 'B', 10)
-            pdf.cell(col_width, 7, txt=f"Técnico: {tech_data['Técnico']}", ln=1)
-            pdf.set_font("Arial", size=10)
-            pdf.set_x(x_pos)
-            pdf.cell(col_width, 6, txt=f"Pets: {tech_data['Total de Pets']}", ln=1)
-            pdf.set_x(x_pos)
-            pdf.cell(col_width, 6, txt=f"Atendimentos: {tech_data['Total de Atendimentos']}", ln=1)
-            pdf.set_x(x_pos)
-            pdf.cell(col_width, 6, txt=f"Valor Produzido: {format_currency(tech_data['Valor Produzido'])}", ln=1)
-            pdf.set_x(x_pos)
-            pdf.cell(col_width, 6, txt=f"Comissão (%): {tech_data['Comissao (%)']}%", ln=1)
-            pdf.set_x(x_pos)
-            
-            if tech_data['Pagamento Base'] < 900:
-                pdf.set_font("Arial", 'U', 10)
-            
-            pdf.cell(col_width, 6, txt=f"Pagamento Base: {format_currency(tech_data['Pagamento Base'])}", ln=1)
-            pdf.set_font("Arial", '', 10)
-            
-            pdf.set_x(x_pos)
-            pdf.cell(col_width, 6, txt=f"Pagamento Fixo: {format_currency(tech_data['Pagamento Fixo'])}", ln=1)
-            pdf.set_x(x_pos)
-            
-            if tech_data['Variáveis'] > 0:
-                pdf.set_text_color(0, 128, 0)
-            elif tech_data['Variáveis'] < 0:
-                pdf.set_text_color(255, 0, 0)
-                
-            pdf.cell(col_width, 6, txt=f"Variáveis: {format_currency(tech_data['Variáveis'])}", ln=1)
-            pdf.set_text_color(0, 0, 0)
-            
-            pdf.set_x(x_pos)
-            pdf.cell(col_width, 6, txt=f"Pagamento Final: {format_currency(tech_data['Pagamento Final'])}", ln=1)
-            pdf.set_x(x_pos)
-            pdf.cell(col_width, 6, txt=f"Support Value: {format_currency(tech_data['Support Value'])}", ln=1)
-
-        if len(tech_group) > 2:
-            tech_data = tech_group[2]
-            x_pos = 10 + col_width * 2
-            pdf.set_xy(x_pos, y_start)
-            pdf.set_font("Arial", 'B', 10)
-            pdf.cell(col_width, 7, txt=f"Técnico: {tech_data['Técnico']}", ln=1)
-            pdf.set_font("Arial", size=10)
-            pdf.set_x(x_pos)
-            pdf.cell(col_width, 6, txt=f"Pets: {tech_data['Total de Pets']}", ln=1)
-            pdf.set_x(x_pos)
-            pdf.cell(col_width, 6, txt=f"Atendimentos: {tech_data['Total de Atendimentos']}", ln=1)
-            pdf.set_x(x_pos)
-            pdf.cell(col_width, 6, txt=f"Valor Produzido: {format_currency(tech_data['Valor Produzido'])}", ln=1)
-            pdf.set_x(x_pos)
-            pdf.cell(col_width, 6, txt=f"Comissão (%): {tech_data['Comissao (%)']}%", ln=1)
-            pdf.set_x(x_pos)
-            
-            if tech_data['Pagamento Base'] < 900:
-                pdf.set_font("Arial", 'U', 10)
-            
-            pdf.cell(col_width, 6, txt=f"Pagamento Base: {format_currency(tech_data['Pagamento Base'])}", ln=1)
-            pdf.set_font("Arial", '', 10)
-            
-            pdf.set_x(x_pos)
-            pdf.cell(col_width, 6, txt=f"Pagamento Fixo: {format_currency(tech_data['Pagamento Fixo'])}", ln=1)
-            pdf.set_x(x_pos)
-            
-            if tech_data['Variáveis'] > 0:
-                pdf.set_text_color(0, 128, 0)
-            elif tech_data['Variáveis'] < 0:
-                pdf.set_text_color(255, 0, 0)
-                
-            pdf.cell(col_width, 6, txt=f"Variáveis: {format_currency(tech_data['Variáveis'])}", ln=1)
-            pdf.set_text_color(0, 0, 0)
-            
-            pdf.set_x(x_pos)
-            pdf.cell(col_width, 6, txt=f"Pagamento Final: {format_currency(tech_data['Pagamento Final'])}", ln=1)
-            pdf.set_x(x_pos)
-            pdf.cell(col_width, 6, txt=f"Support Value: {format_currency(tech_data['Support Value'])}", ln=1)
-        
-        pdf.set_y(pdf.get_y() + 10)
+        pdf.set_y(y_start + block_height_tech + 5)
+        pdf.set_text_color(0, 0, 0)
 
     if custom_variables and any(v['tech'] for v in custom_variables):
         pdf.ln(10)
@@ -162,10 +102,10 @@ def create_payroll_summary_with_vars_pdf(payroll_data, custom_variables, start_d
             var_group = vars_filtered[i:i+3]
             
             line_height = 6
-            num_lines = 7
-            block_height = num_lines * line_height + 2
+            num_lines_vars = 7
+            block_height_vars = num_lines_vars * line_height + 2
 
-            if pdf.get_y() + block_height > pdf.h - pdf.b_margin:
+            if pdf.get_y() + block_height_vars > pdf.h - pdf.b_margin:
                 pdf.add_page()
                 pdf.ln(5)
             
@@ -188,8 +128,8 @@ def create_payroll_summary_with_vars_pdf(payroll_data, custom_variables, start_d
                     pdf.set_fill_color(240, 240, 240)
                     pdf.set_text_color(0, 0, 0)
                 
-                pdf.rect(x_pos - 1, y_start - 1, col_width, block_height, 'F')
-                pdf.rect(x_pos - 1, y_start - 1, col_width, block_height, 'D')
+                pdf.rect(x_pos - 1, y_start - 1, col_width, block_height_vars, 'F')
+                pdf.rect(x_pos - 1, y_start - 1, col_width, block_height_vars, 'D')
 
                 pdf.set_xy(x_pos, y_start)
                 pdf.set_font("Arial", 'B', 10)
@@ -208,7 +148,7 @@ def create_payroll_summary_with_vars_pdf(payroll_data, custom_variables, start_d
                 pdf.set_x(x_pos)
                 pdf.cell(col_width, line_height, txt=f"Dívida Paga: {format_currency(paid_debt)}", ln=1)
                 
-            pdf.set_y(y_start + block_height + 5)
+            pdf.set_y(y_start + block_height_vars + 5)
             pdf.set_text_color(0, 0, 0)
 
     pdf.ln(10)
