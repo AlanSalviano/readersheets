@@ -84,8 +84,7 @@ def zip_code_page():
     st.markdown("---")
     
     # Adicionar campo para a chave de API
-    st.markdown("### Configurações")
-    google_maps_api_key = st.text_input("Insira sua chave da Google Maps API:", type="password", value="AIzaSyCtn6nbsSgdqVrlphccWsc7jrCKYeV_FuU")
+    google_maps_api_key = "AIzaSyCtn6nbsSgdqVrlphccWsc7jrCKYeV_FuU"
 
     # Seção de Verificação de Zip Codes
     st.subheader("Verificação de Zip Codes")
