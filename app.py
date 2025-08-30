@@ -21,6 +21,7 @@ from modules.utils import format_currency
 from modules.payroll_module import payroll_page
 from modules.verificacao_zip_codes import zip_code_page
 from modules.limpeza_numeros import limpeza_numeros_page
+from modules.franchises_module import franchises_page
 
 
 def local_css():
@@ -55,13 +56,13 @@ def financial_analysis_page(data):
         """,
         unsafe_allow_html=True
     )
-    
+
     st.markdown("---")
 
     # Processamento dos dados
     completed_services = data[data['Realizado']]
     not_completed = data[(data['Realizado'] == False) & (data['Cliente'].notna())]
-    
+
     if 'Pets' in completed_services.columns:
         quantidade_pets = completed_services['Pets'].sum()
     else:
@@ -88,11 +89,11 @@ def financial_analysis_page(data):
 
     # 📊 Cartões de Métricas - Layout mais compacto
     total_lucro = completed_services['Lucro Empresa'].sum()
-    
+
     with st.container():
         st.markdown('<h3 style="margin-bottom: 0;">Métricas Gerais</h3>', unsafe_allow_html=True)
         col1, col2, col3, col4, col5, col6 = st.columns(6)
-        
+
         with col1:
             st.markdown('<div class="metric-card-compact"><p class="metric-title-compact">Realizados</p><p class="metric-value-compact">{0}</p></div>'.format(len(completed_services)), unsafe_allow_html=True)
         with col2:
@@ -105,7 +106,7 @@ def financial_analysis_page(data):
             st.markdown('<div class="metric-card-compact"><p class="metric-title-compact">Total Gorjetas</p><p class="metric-value-compact">{0}</p></div>'.format(format_currency(completed_services["Gorjeta"].sum())), unsafe_allow_html=True)
         with col6:
             st.markdown('<div class="metric-card-compact"><p class="metric-title-compact">Lucro Empresa</p><p class="metric-value-compact">{0}</p></div>'.format(format_currency(total_lucro)), unsafe_allow_html=True)
-    
+
     st.markdown("---")
 
     # 📈 Gráficos e Tabelas - Layout de duas colunas
@@ -113,7 +114,7 @@ def financial_analysis_page(data):
     with col1:
         st.markdown("### Evolução e Pagamentos")
         st.plotly_chart(plot_weekly_evolution(weekly_totals), use_container_width=True)
-        
+
         st.plotly_chart(plot_weekly_payments(weekly_totals), use_container_width=True)
 
     with col2:
@@ -163,7 +164,7 @@ def financial_analysis_page(data):
         payment_summary['Percentual Uso'] = (payment_summary['Qtd Usos'] / payment_summary['Qtd Usos'].sum() * 100).round(2)
 
         st.dataframe(payment_summary, hide_index=True)
-        
+
         col1, col2 = st.columns(2)
         with col1:
             st.plotly_chart(plot_payment_methods_total(payment_summary), use_container_width=True)
@@ -263,8 +264,8 @@ def main():
 
         st.session_state.selected_page = option_menu(
             menu_title=None,
-            options=["Análises Financeiras", "Payroll dos Técnicos", "Limpeza de Números", "Zip Codes"],
-            icons=["bar-chart", "cash-stack", "phone", "geo-alt"],
+            options=["Análises Financeiras", "Payroll dos Técnicos", "Franchises", "Limpeza de Números", "Zip Codes"],
+            icons=["bar-chart", "cash-stack", "building", "phone", "geo-alt"],
             menu_icon="cast",
             default_index=0,
             styles={
@@ -305,7 +306,7 @@ def main():
             st.stop()
 
         data = pd.concat(all_dataframes, ignore_index=True)
-        
+
         # Filtros que serão aplicados a ambas as páginas
         st.sidebar.header("Filtrar por:")
         st.session_state.selected_weeks = st.sidebar.multiselect("Selecione as semanas para análise", options=data['Semana'].unique())
@@ -328,22 +329,14 @@ def main():
     if st.session_state.selected_page == "Análises Financeiras":
         financial_analysis_page(filtered_data)
     elif st.session_state.selected_page == "Payroll dos Técnicos":
-        if not st.session_state.logged_in:
-            st.title("Acesso Restrito - Payroll dos Técnicos")
-            st.info("Para acessar esta página, por favor, insira a senha.")
-            password = st.text_input("Insira a senha:", type="password", key="payroll_password")
-            if password == '6655':
-                st.session_state.logged_in = True
-                st.success("Senha correta! Redirecionando para a página do Payroll dos Técnicos.")
-                st.rerun()
-            elif password:
-                st.error("Senha incorreta. Tente novamente.")
-        else:
-            payroll_page(filtered_data)
+        payroll_page(filtered_data)
+    elif st.session_state.selected_page == "Franchises":
+        franchises_page()
     elif st.session_state.selected_page == "Zip Codes":
         zip_code_page()
     elif st.session_state.selected_page == "Limpeza de Números":
         limpeza_numeros_page()
+
 
 if __name__ == "__main__":
     main()
