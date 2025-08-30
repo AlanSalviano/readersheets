@@ -1,0 +1,18 @@
+[
+    {
+        "nome": "Teste",
+        "cidades": [
+            "orlando",
+            "Loan",
+            "Aurora"
+        ]
+    },
+    {
+        "nome": "João",
+        "cidades": [
+            "florida",
+            "michigan",
+            "Aurora"
+        ]
+    }
+]
