@@ -20,6 +20,7 @@ from modules.visualization import (
 from modules.utils import format_currency
 from modules.payroll_module import payroll_page
 from modules.verificacao_zip_codes import zip_code_page
+from modules.limpeza_numeros import limpeza_numeros_page
 
 
 def local_css():
@@ -262,8 +263,8 @@ def main():
 
         st.session_state.selected_page = option_menu(
             menu_title=None,
-            options=["Análises Financeiras", "Payroll dos Técnicos", "Zip Codes"],
-            icons=["bar-chart", "cash-stack", "geo-alt"],
+            options=["Análises Financeiras", "Payroll dos Técnicos", "Limpeza de Números", "Zip Codes"],
+            icons=["bar-chart", "cash-stack", "phone", "geo-alt"],
             menu_icon="cast",
             default_index=0,
             styles={
@@ -341,6 +342,8 @@ def main():
             payroll_page(filtered_data)
     elif st.session_state.selected_page == "Zip Codes":
         zip_code_page()
+    elif st.session_state.selected_page == "Limpeza de Números":
+        limpeza_numeros_page()
 
 if __name__ == "__main__":
     main()
