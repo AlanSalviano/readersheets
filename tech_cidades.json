@@ -2,19 +2,479 @@
     {
         "nome": "Heitor Jose de Goes Correa",
         "cidades": [
-            "orlando",
-            "Loan",
-            "Aurora"
+            "Denver",
+            "Boulder",
+            "Aurora",
+            "Lakewood",
+            "Littleton",
+            "Centennial",
+            "Arvada",
+            "Westminster",
+            "Thornton",
+            "Englewood"
         ],
         "zip_code": "80249"
     },
     {
-        "nome": "João",
+        "nome": "Eliabe Damas Moreira",
         "cidades": [
-            "florida",
-            "michigan",
-            "Aurora"
+            "Sarasota",
+            "Venice",
+            "Englewood",
+            "Port Charlotte",
+            "Punta Gorda",
+            "Fort Myers",
+            "Cape Coral",
+            "Bradenton",
+            "Naples"
         ],
-        "zip_code": "17903"
+        "zip_code": "33063"
+    },
+    {
+        "nome": "Lorena Monturil",
+        "zip_code": "33764",
+        "cidades": [
+            "Hudson",
+            "St. Petersburg",
+            "Dunedin",
+            "Clearwater"
+        ]
+    },
+    {
+        "nome": "David Medeiros",
+        "zip_code": "34787",
+        "cidades": [
+            "Homosassa",
+            "Zephyrhills",
+            "Brooksville",
+            "Inverness",
+            "North Brooksville",
+            "Floral City",
+            "Dunnellon"
+        ]
+    },
+    {
+        "nome": "Arianne Graciano",
+        "zip_code": "",
+        "cidades": [
+            "Boca Raton",
+            "Homestead",
+            "Deerfield Beach",
+            "Pompano Beach",
+            "Fort Lauderdale",
+            "Hollywood",
+            "Hallandale Beach",
+            "Aventura",
+            "North Miami Beach",
+            "Miami",
+            "Kendall",
+            "Cutler Bay"
+        ]
+    },
+    {
+        "nome": "Eduardo Wilms",
+        "zip_code": "",
+        "cidades": [
+            "Atlanta",
+            "Sandy Springs",
+            "Roswell",
+            "Johns Creek",
+            "Alpharetta",
+            "Milton",
+            "East Point",
+            "College Park",
+            "Fairburn",
+            "Union City",
+            "Condado de Fulton",
+            "Condado de DeKalb",
+            "Decatur",
+            "Dunwoody",
+            "Brookhaven",
+            "Stone Mountain",
+            "Tucker",
+            "Marietta",
+            "Smyrna",
+            "Kennesaw",
+            "Acworth",
+            "Powder Springs",
+            "Condado de Cobb",
+            "Condado de Gwinnett",
+            "Lawrenceville",
+            "Norcross",
+            "Duluth",
+            "Suwanee",
+            "Buford",
+            "Snellville",
+            "Lilburn",
+            "Jonesboro",
+            "Riverdale",
+            "Forest Park",
+            "Stockbridge",
+            "McDonough",
+            "Fayetteville",
+            "Douglasville",
+            "Peachtree City",
+            "Newnan",
+            "Conyers",
+            "Covington",
+            "Cumming"
+        ]
+    },
+    {
+        "nome": "Ana Minervini",
+        "zip_code": "",
+        "cidades": [
+            "Charlotte",
+            "Concord",
+            "Kannapolis",
+            "Huntersville",
+            "Cornelius",
+            "Davidson",
+            "Mooresville",
+            "Statesville",
+            "Hickory",
+            "Gastonia",
+            "Belmont",
+            "Mount Holly",
+            "Lincolnton",
+            "Shelby",
+            "Rock Hill",
+            "Fort Mill",
+            "Clover",
+            "Lancaster",
+            "Indian Land",
+            "Monroe",
+            "Matthews",
+            "Mint Hill",
+            "Indian Trail",
+            "Stallings",
+            "Weddington",
+            "Waxhaw",
+            "Pineville"
+        ]
+    },
+    {
+        "nome": "Lucas Fagundes",
+        "zip_code": "",
+        "cidades": [
+            "Boston",
+            "Cambridge",
+            "Somerville",
+            "Brookline",
+            "Newton",
+            "Quincy",
+            "Waltham",
+            "Watertown",
+            "Medford",
+            "Malden",
+            "Everett",
+            "Chelsea",
+            "Revere",
+            "Lynn",
+            "Salem",
+            "Beverly",
+            "Peabody",
+            "Danvers",
+            "Gloucester",
+            "Marblehead",
+            "Saugus",
+            "Melrose",
+            "Wakefield",
+            "Reading",
+            "Woburn",
+            "Burlington",
+            "Lexington",
+            "Arlington",
+            "Belmont",
+            "Winchester",
+            "Stoneham",
+            "Andover",
+            "Lawrence",
+            "Lowell",
+            "Billerica",
+            "Tewksbury",
+            "Wilmington",
+            "Dracut",
+            "Methuen",
+            "Haverhill",
+            "Framingham",
+            "Natick",
+            "Wellesley",
+            "Needham",
+            "Dedham",
+            "Norwood",
+            "Canton",
+            "Milton",
+            "Randolph",
+            "Braintree",
+            "Weymouth",
+            "Hingham",
+            "Cohasset",
+            "Scituate",
+            "Marshfield",
+            "Brockton",
+            "Stoughton",
+            "Taunton",
+            "Attleboro"
+        ]
+    },
+    {
+        "nome": "Carlos Figueiras",
+        "zip_code": "",
+        "cidades": [
+            "Dallas",
+            "Fort Worth",
+            "Grapevine",
+            "Plano",
+            "McKinney",
+            "Arlington"
+        ]
+    },
+    {
+        "nome": "Rolando Cruz",
+        "zip_code": "",
+        "cidades": [
+            "Houston",
+            "Galveston",
+            "Katy",
+            "Kemah"
+        ]
+    },
+    {
+        "nome": "Bismar Cedeno",
+        "zip_code": "",
+        "cidades": [
+            "Houston",
+            "Galveston",
+            "Katy",
+            "Kemah"
+        ]
+    },
+    {
+        "nome": "Yisel Gomez",
+        "zip_code": "",
+        "cidades": [
+            "Houston",
+            "Galveston",
+            "Katy",
+            "Kemah"
+        ]
+    },
+    {
+        "nome": "Randy",
+        "zip_code": "",
+        "cidades": [
+            "Austin",
+            "San Antonio",
+            "Round Rock",
+            "Cedar Park",
+            "Pflugerville",
+            "San Marcos",
+            "Georgetown",
+            "New Braunfels"
+        ]
+    },
+    {
+        "nome": "Livan",
+        "zip_code": "",
+        "cidades": [
+            "Austin",
+            "San Antonio",
+            "Round Rock",
+            "Cedar Park",
+            "Pflugerville",
+            "San Marcos",
+            "Georgetown",
+            "New Braunfels"
+        ]
+    },
+    {
+        "nome": "Heitor Jose de Goes Correa",
+        "cidades": [
+            "Denver",
+            "Boulder",
+            "Aurora",
+            "Lakewood",
+            "Littleton",
+            "Centennial",
+            "Arvada",
+            "Westminster",
+            "Thornton",
+            "Englewood"
+        ],
+        "zip_code": "80249"
+    },
+    {
+        "nome": "João Paulo",
+        "zip_code": "",
+        "cidades": [
+            "Phoenix",
+            "Scottsdale",
+            "Mesa",
+            "Glendale",
+            "Tempe",
+            "Chandler",
+            "Gilbert",
+            "Peoria",
+            "Surprise",
+            "Avondale"
+        ]
+    },
+    {
+        "nome": "Jorge",
+        "zip_code": "",
+        "cidades": [
+            "Salt Lake City",
+            "West Valley City",
+            "Provo",
+            "West Jordan",
+            "Orem",
+            "Sandy",
+            "Ogden",
+            "Layton",
+            "Murray",
+            "Taylorsville"
+        ]
+    },
+    {
+        "nome": "Isabelle",
+        "zip_code": "",
+        "cidades": [
+            "Jacksonville",
+            "Atlantic Beach",
+            "Neptune Beach"
+        ]
+    },
+    {
+        "nome": "Nathalia",
+        "zip_code": "",
+        "cidades": [
+            "Orlando",
+            "Winter Park",
+            "Apopka"
+        ]
+    },
+    {
+        "nome": "Jessica",
+        "zip_code": "",
+        "cidades": [
+            "Orlando",
+            "Winter Park",
+            "Apopka"
+        ]
+    },
+    {
+        "nome": "Leonardo",
+        "zip_code": "",
+        "cidades": [
+            "Orlando",
+            "Winter Park",
+            "Apopka"
+        ]
+    },
+    {
+        "nome": "Artur",
+        "zip_code": "",
+        "cidades": [
+            "Sanford",
+            "Oviedo",
+            "Altamonte Springs",
+            "Daytona Beach",
+            "Deltona",
+            "Ormond Beach",
+            "New Smyrna Beach"
+        ]
+    },
+    {
+        "nome": "John",
+        "zip_code": "",
+        "cidades": [
+            "Sanford",
+            "Oviedo",
+            "Altamonte Springs",
+            "Daytona Beach",
+            "Deltona",
+            "Ormond Beach",
+            "New Smyrna Beach"
+        ]
+    },
+    {
+        "nome": "Alec",
+        "zip_code": "",
+        "cidades": [
+            "Tampa",
+            "Brandon",
+            "Riverview",
+            "Plant City"
+        ]
+    },
+    {
+        "nome": "Patricia",
+        "zip_code": "",
+        "cidades": [
+            "Tampa",
+            "Brandon",
+            "Riverview",
+            "Plant City"
+        ]
+    },
+    {
+        "nome": "Darlin",
+        "zip_code": "",
+        "cidades": [
+            "Tampa",
+            "Brandon",
+            "Riverview",
+            "Plant City"
+        ]
+    },
+    {
+        "nome": "Mauricio",
+        "zip_code": "",
+        "cidades": [
+            "Atlanta",
+            "Sandy Springs",
+            "Roswell",
+            "Johns Creek",
+            "Alpharetta",
+            "Milton",
+            "East Point",
+            "College Park",
+            "Fairburn",
+            "Union City",
+            "Condado de Fulton",
+            "Condado de DeKalb",
+            "Decatur",
+            "Dunwoody",
+            "Brookhaven",
+            "Stone Mountain",
+            "Tucker",
+            "Marietta",
+            "Smyrna",
+            "Kennesaw",
+            "Acworth",
+            "Powder Springs",
+            "Condado de Cobb",
+            "Condado de Gwinnett",
+            "Lawrenceville",
+            "Norcross",
+            "Duluth",
+            "Suwanee",
+            "Buford",
+            "Snellville",
+            "Lilburn",
+            "Jonesboro",
+            "Riverdale",
+            "Forest Park",
+            "Stockbridge",
+            "McDonough",
+            "Fayetteville",
+            "Douglasville",
+            "Peachtree City",
+            "Newnan",
+            "Conyers",
+            "Covington",
+            "Cumming"
+        ]
     }
 ]
