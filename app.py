@@ -19,6 +19,7 @@ from modules.visualization import (
 )
 from modules.utils import format_currency
 from modules.payroll_module import payroll_page
+from modules.verificacao_zip_codes import zip_code_page
 
 
 def local_css():
@@ -245,6 +246,12 @@ def main():
     st.set_page_config(page_title="BNS App", layout="wide")
     local_css()
 
+    # Inicializa o estado de login
+    if 'logged_in' not in st.session_state:
+        st.session_state.logged_in = False
+    if 'selected_page' not in st.session_state:
+        st.session_state.selected_page = "Análises Financeiras"
+
     # Sidebar com menu de opções
     with st.sidebar:
         st.markdown("""
@@ -252,11 +259,11 @@ def main():
             <img src="https://i.imgur.com/tlb2Bcy.png" alt="Logo da Empresa" width="200">
         </div>
         """, unsafe_allow_html=True)
-        
-        selected_page = option_menu(
+
+        st.session_state.selected_page = option_menu(
             menu_title=None,
-            options=["Análises Financeiras", "Payroll"],
-            icons=["bar-chart", "cash-stack"],
+            options=["Análises Financeiras", "Payroll dos Técnicos", "Zip Codes"],
+            icons=["bar-chart", "cash-stack", "geo-alt"],
             menu_icon="cast",
             default_index=0,
             styles={
@@ -265,64 +272,75 @@ def main():
         )
 
     # Lógica de carregamento de dados (compartilhada entre as páginas)
-    st.sidebar.title("Filtros e Dados")
-    drive_folder_input = st.sidebar.text_input("Cole o ID ou URL da pasta do Google Drive")
-    drive_folder_id = extract_folder_id(drive_folder_input)
+    if st.session_state.selected_page in ["Análises Financeiras", "Payroll dos Técnicos"]:
+        st.sidebar.title("Filtros e Dados")
+        drive_folder_input = st.sidebar.text_input("Cole o ID ou URL da pasta do Google Drive")
+        drive_folder_id = extract_folder_id(drive_folder_input)
 
-    all_dataframes = []
+        all_dataframes = []
 
-    if drive_folder_id:
-        with st.spinner('Acedendo ao Google Drive e a processar as planilhas...'):
-            try:
-                files_data = get_files_from_drive_folder(drive_folder_id)
-                if files_data:
-                    for file_content in files_data:
-                        df = process_spreadsheet(file_content)
-                        if not df.empty:
-                            all_dataframes.append(df)
-            except Exception as e:
-                st.error(f"Erro ao aceder ao Google Drive: {e}")
-                st.stop()
-    else:
-        uploaded_files = st.sidebar.file_uploader("Ou carregue uma ou mais planilhas Excel", type=['xlsx'], accept_multiple_files=True)
-        files_to_process = uploaded_files
-        for file in files_to_process:
-            df = process_spreadsheet(file)
-            if not df.empty:
-                all_dataframes.append(df)
+        if drive_folder_id:
+            with st.spinner('Acedendo ao Google Drive e a processar as planilhas...'):
+                try:
+                    files_data = get_files_from_drive_folder(drive_folder_id)
+                    if files_data:
+                        for file_content in files_data:
+                            df = process_spreadsheet(file_content)
+                            if not df.empty:
+                                all_dataframes.append(df)
+                except Exception as e:
+                    st.error(f"Erro ao aceder ao Google Drive: {e}")
+                    st.stop()
+        else:
+            uploaded_files = st.sidebar.file_uploader("Ou carregue uma ou mais planilhas Excel", type=['xlsx'], accept_multiple_files=True)
+            files_to_process = uploaded_files
+            for file in files_to_process:
+                df = process_spreadsheet(file)
+                if not df.empty:
+                    all_dataframes.append(df)
 
-    if not all_dataframes:
-        st.warning("⚠️ Nenhuma planilha carregada. Por favor, carregue uma planilha para iniciar.")
-        st.stop()
+        if not all_dataframes:
+            st.warning("⚠️ Nenhuma planilha carregada. Por favor, carregue uma planilha para iniciar.")
+            st.stop()
 
-    data = pd.concat(all_dataframes, ignore_index=True)
-    
-    # Filtros que serão aplicados a ambas as páginas
-    st.sidebar.header("Filtrar por:")
-    st.session_state.selected_weeks = st.sidebar.multiselect("Selecione as semanas para análise", options=data['Semana'].unique())
-    st.session_state.selected_techs = st.sidebar.multiselect("Selecione os técnicos:", options=data['Nome'].unique(), default=list(data['Nome'].unique()))
-    st.session_state.selected_categories = st.sidebar.multiselect("Selecione as categorias:", options=data['Categoria'].unique(), default=list(data['Categoria'].unique()))
-
-    filtered_data = data.copy()
-    if st.session_state.selected_weeks:
-        filtered_data = filtered_data[filtered_data['Semana'].isin(st.session_state.selected_weeks)]
-    if st.session_state.selected_techs:
-        filtered_data = filtered_data[filtered_data['Nome'].isin(st.session_state.selected_techs)]
-    if st.session_state.selected_categories:
-        filtered_data = filtered_data[filtered_data['Categoria'].isin(st.session_state.selected_categories)]
-
-    if filtered_data.empty:
-        st.warning("Nenhum dado encontrado com os filtros selecionados.")
-        st.stop()
+        data = pd.concat(all_dataframes, ignore_index=True)
         
-    st.success("✅ Planilhas processadas com sucesso!")
+        # Filtros que serão aplicados a ambas as páginas
+        st.sidebar.header("Filtrar por:")
+        st.session_state.selected_weeks = st.sidebar.multiselect("Selecione as semanas para análise", options=data['Semana'].unique())
+        st.session_state.selected_techs = st.sidebar.multiselect("Selecione os técnicos:", options=data['Nome'].unique(), default=list(data['Nome'].unique()))
+        st.session_state.selected_categories = st.sidebar.multiselect("Selecione as categorias:", options=data['Categoria'].unique(), default=list(data['Categoria'].unique()))
 
+        filtered_data = data.copy()
+        if st.session_state.selected_weeks:
+            filtered_data = filtered_data[filtered_data['Semana'].isin(st.session_state.selected_weeks)]
+        if st.session_state.selected_techs:
+            filtered_data = filtered_data[filtered_data['Nome'].isin(st.session_state.selected_techs)]
+        if st.session_state.selected_categories:
+            filtered_data = filtered_data[filtered_data['Categoria'].isin(st.session_state.selected_categories)]
+
+        if filtered_data.empty:
+            st.warning("Nenhum dado encontrado com os filtros selecionados.")
+            st.stop()
+            
     # Exibição da página selecionada
-    if selected_page == "Análises Financeiras":
+    if st.session_state.selected_page == "Análises Financeiras":
         financial_analysis_page(filtered_data)
-    elif selected_page == "Payroll":
-        payroll_page(filtered_data)
-
+    elif st.session_state.selected_page == "Payroll dos Técnicos":
+        if not st.session_state.logged_in:
+            st.title("Acesso Restrito - Payroll dos Técnicos")
+            st.info("Para acessar esta página, por favor, insira a senha.")
+            password = st.text_input("Insira a senha:", type="password", key="payroll_password")
+            if password == '6655':
+                st.session_state.logged_in = True
+                st.success("Senha correta! Redirecionando para a página do Payroll dos Técnicos.")
+                st.rerun()
+            elif password:
+                st.error("Senha incorreta. Tente novamente.")
+        else:
+            payroll_page(filtered_data)
+    elif st.session_state.selected_page == "Zip Codes":
+        zip_code_page()
 
 if __name__ == "__main__":
     main()
