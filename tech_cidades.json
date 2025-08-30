@@ -1,11 +1,12 @@
 [
     {
-        "nome": "Teste",
+        "nome": "Heitor Jose de Goes Correa",
         "cidades": [
             "orlando",
             "Loan",
             "Aurora"
-        ]
+        ],
+        "zip_code": "80249"
     },
     {
         "nome": "João",
@@ -13,6 +14,7 @@
             "florida",
             "michigan",
             "Aurora"
-        ]
+        ],
+        "zip_code": "17903"
     }
 ]
